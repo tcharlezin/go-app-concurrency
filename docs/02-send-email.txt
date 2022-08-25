@@ -1,0 +1,19 @@
+mux.Get("/test-email", func(writer http.ResponseWriter, request *http.Request) {
+    m := Mail{
+        Domain:      "localhost",
+        Host:        "localhost",
+        Port:        1025,
+        Encryption:  "none",
+        FromAddress: "Info@mycompany.com",
+        FromName:    "Info",
+        ErrorChan:   make(chan error),
+    }
+
+    msg := Message{
+        To:      "me@here.com",
+        Subject: "Test e-mail",
+        Data:    "Hello World!",
+    }
+
+    m.sendMail(msg, make(chan error))
+})
