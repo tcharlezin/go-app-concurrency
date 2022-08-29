@@ -173,7 +173,13 @@ func (app *Config) SubscribeToPlan(w http.ResponseWriter, r *http.Request) {
 	// get the id of the plan that is choosen
 	id := r.URL.Query().Get("id")
 
-	planID, _ := strconv.Atoi(id)
+	planID, err := strconv.Atoi(id)
+
+	if err != nil {
+		app.ErrorLog.Println("Error getting plan: ", err)
+		http.Redirect(w, r, "/members/plans", http.StatusSeeOther)
+		return
+	}
 
 	// get the plan from the database
 	plan, err := app.Models.Plan.GetOne(planID)
@@ -225,10 +231,9 @@ func (app *Config) SubscribeToPlan(w http.ResponseWriter, r *http.Request) {
 		}
 
 		msg := Message{
-			To:       user.Email,
-			Subject:  "Your manual",
-			Data:     "Your user manual is attached.",
-			Template: "manual",
+			To:      user.Email,
+			Subject: "Your manual",
+			Data:    "Your user manual is attached.",
 			AttachmentMap: map[string]string{
 				"Manual.pdf": fmt.Sprintf("./tmp/%d_manual.pdf", user.ID),
 			},
@@ -240,7 +245,22 @@ func (app *Config) SubscribeToPlan(w http.ResponseWriter, r *http.Request) {
 		app.ErrorChan <- errors.New("Some custom error!")
 	}()
 
-	// subscribe user to an account
+	// subscribe user to an plan
+	err = app.Models.Plan.SubscribeUserToPlan(user, *plan)
+	if err != nil {
+		app.Session.Put(r.Context(), "error", "Error subscribing to plan!")
+		http.Redirect(w, r, "/members/plans", http.StatusSeeOther)
+		return
+	}
+
+	u, err := app.Models.User.GetOne(user.ID)
+	if err != nil {
+		app.Session.Put(r.Context(), "error", "Error getting user from database!")
+		http.Redirect(w, r, "/members/plans", http.StatusSeeOther)
+		return
+	}
+
+	app.Session.Put(r.Context(), "user", u)
 
 	// redirect
 	app.Session.Put(r.Context(), "flash", "Subscribed!")
