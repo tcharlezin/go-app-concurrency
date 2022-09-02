@@ -2,6 +2,19 @@ version: '3'
 
 services:
 
+  go-app-concurrency:
+    build:
+      context: .
+      dockerfile: go-app-concurrency.dockerfile
+    restart: always
+    ports:
+      - "80:80"
+    deploy:
+      mode: replicated
+      replicas: 1
+    environment:
+      DSN: "host=postgres port=5432 user=postgres password=password dbname=concurrency sslmode=disable timezone=UTC connect_timeout=5"
+
   #  start Postgres, and ensure that data is stored to a mounted volume
   postgres:
     image: 'postgres:14.2'

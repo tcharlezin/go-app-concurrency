@@ -5,7 +5,7 @@ REDIS="127.0.0.1:6379"
 ## build: Build binary
 build:
 	@echo "Building..."
-	env CGO_ENABLED=0  go build -ldflags="-s -w" -o ${BINARY_NAME} ./cmd/web
+	env GOOS=linux CGO_ENABLED=0 go build -o ${BINARY_NAME} ./cmd/web
 	@echo "Built!"
 
 ## run: builds and runs the application

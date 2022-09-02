@@ -1,7 +1,9 @@
 FROM alpine:latest
 
 RUN mkdir /app
+RUN mkdir /templates
 
-COPY goAppConcurrency /app
+COPY myapp /app
+COPY cmd/web/templates /templates
 
-CMD [ "/app/goAppConcurrency" ]
+CMD [ "/app/myapp" ]

@@ -135,7 +135,7 @@ func (m *Mail) sendMail(msg Message, errorChan chan error) {
 }
 
 func (m *Mail) buildHTMLMessage(msg Message) (string, error) {
-	templateToRender := fmt.Sprintf("./cmd/web/templates/%s.html.gohtml", msg.Template)
+	templateToRender := fmt.Sprintf("%s/%s.html.gohtml", pathToTemplates, msg.Template)
 
 	t, err := template.New("email-html").ParseFiles(templateToRender)
 
@@ -158,7 +158,7 @@ func (m *Mail) buildHTMLMessage(msg Message) (string, error) {
 }
 
 func (m *Mail) buildPlainTextMessage(msg Message) (string, error) {
-	templateToRender := fmt.Sprintf("./cmd/web/templates/%s.plain.gohtml", msg.Template)
+	templateToRender := fmt.Sprintf("%s/%s.plain.gohtml", pathToTemplates, msg.Template)
 
 	t, err := template.New("email-plain").ParseFiles(templateToRender)
 

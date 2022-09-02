@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-var pathToTemplates = "./cmd/web/templates"
+var pathToTemplates = "./templates"
 
 type TemplateData struct {
 	StringMap     map[string]string
