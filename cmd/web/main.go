@@ -36,8 +36,6 @@ func main() {
 	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
 	errorLog := log.New(os.Stdout, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 
-	// Create channels
-
 	// Create a wait group
 	wg := sync.WaitGroup{}
 
@@ -145,6 +143,7 @@ func initSession() *scs.SessionManager {
 	// Define as a object valid to store in session
 	gob.Register(data.User{})
 
+	// setup session
 	session := scs.New()
 	session.Store = redisstore.New(initRedis())
 	session.Lifetime = 24 * time.Hour
