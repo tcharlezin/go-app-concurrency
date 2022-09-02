@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/gob"
 	"final-project/data"
 	"github.com/alexedwards/scs/v2"
@@ -69,4 +70,13 @@ func TestMain(m *testing.M) {
 
 	os.Exit(m.Run())
 
+}
+
+func getCtx(req *http.Request) context.Context {
+	ctx, err := testApp.Session.Load(req.Context(), req.Header.Get("X-Session"))
+	if err != nil {
+		log.Println(err)
+	}
+
+	return ctx
 }
