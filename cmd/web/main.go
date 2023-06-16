@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
 	"sync"
 	"syscall"
 	"time"
@@ -199,13 +200,17 @@ func (app *Config) CreateMail() Mail {
 	mailerChan := make(chan Message, 100)
 	mailerDoneChan := make(chan bool)
 
+	port, _ := strconv.Atoi(os.Getenv("MAIL_PORT"))
+
 	m := Mail{
-		Domain:      "localhost",
-		Host:        "localhost",
-		Port:        1025,
-		Encryption:  "none",
-		FromAddress: "Info@mycompany.com",
-		FromName:    "Info",
+		Domain:      os.Getenv("MAIL_DOMAIN"),
+		Host:        os.Getenv("MAIL_HOST"),
+		Port:        port,
+		Username:    os.Getenv("MAIL_USERNAME"),
+		Password:    os.Getenv("MAIL_PASSWORD"),
+		Encryption:  os.Getenv("MAIL_ENCRYPTION"),
+		FromName:    os.Getenv("MAIL_FROM_NAME"),
+		FromAddress: os.Getenv("MAIL_FROM_ADDRESS"),
 		ErrorChan:   errorChan,
 		MailerChan:  mailerChan,
 		DoneChan:    mailerDoneChan,

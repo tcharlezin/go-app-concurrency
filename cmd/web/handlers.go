@@ -12,6 +12,9 @@ import (
 	"time"
 )
 
+var pathToManual = "./pdf"
+var tmpPath = "./tmp"
+
 func (app *Config) HomePage(w http.ResponseWriter, r *http.Request) {
 	app.render(w, r, "home.page.gohtml", nil)
 }
@@ -41,7 +44,7 @@ func (app *Config) PostLoginPage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// check the password
-	validPassword, err := user.PasswordMatches(password)
+	validPassword, err := app.Models.User.PasswordMatches(password)
 	if err != nil {
 		app.Session.Put(r.Context(), "error", "Invalid credentials")
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
@@ -102,7 +105,7 @@ func (app *Config) PostRegisterPage(w http.ResponseWriter, r *http.Request) {
 		IsAdmin:   0,
 	}
 
-	_, err = user.Insert(user)
+	_, err = app.Models.User.Insert(user)
 
 	if err != nil {
 		app.Session.Put(r.Context(), "error", "Unable to create user!")
@@ -152,7 +155,7 @@ func (app *Config) ActivateAccount(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user.Active = 1
-	err = user.Update()
+	err = app.Models.User.Update(*user)
 
 	if err != nil {
 		app.Session.Put(r.Context(), "error", "Unable to update user!")
@@ -162,10 +165,6 @@ func (app *Config) ActivateAccount(w http.ResponseWriter, r *http.Request) {
 
 	app.Session.Put(r.Context(), "flash", "Account activated! You can now login!")
 	http.Redirect(w, r, "/", http.StatusSeeOther)
-
-	// send an email with the invoice attached
-
-	// subscribe the user to an account
 }
 
 func (app *Config) SubscribeToPlan(w http.ResponseWriter, r *http.Request) {
@@ -224,7 +223,7 @@ func (app *Config) SubscribeToPlan(w http.ResponseWriter, r *http.Request) {
 		defer app.Wait.Done()
 
 		pdf := app.generateManual(user, plan)
-		err := pdf.OutputFileAndClose(fmt.Sprintf("./tmp/%d_manual.pdf", user.ID))
+		err := pdf.OutputFileAndClose(fmt.Sprintf("%s/%d_manual.pdf", tmpPath, user.ID))
 		if err != nil {
 			app.ErrorChan <- err
 			return
@@ -235,7 +234,7 @@ func (app *Config) SubscribeToPlan(w http.ResponseWriter, r *http.Request) {
 			Subject: "Your manual",
 			Data:    "Your user manual is attached.",
 			AttachmentMap: map[string]string{
-				"Manual.pdf": fmt.Sprintf("./tmp/%d_manual.pdf", user.ID),
+				"Manual.pdf": fmt.Sprintf("%s/%d_manual.pdf", tmpPath, user.ID),
 			},
 		}
 
@@ -274,7 +273,7 @@ func (app *Config) generateManual(user data.User, plan *data.Plan) *gofpdf.Fpdf 
 	importer := gofpdi.NewImporter()
 	time.Sleep(5 * time.Second)
 
-	template := importer.ImportPage(pdf, "./pdf/manual.pdf", 1, "/MediaBox")
+	template := importer.ImportPage(pdf, fmt.Sprintf("%s/manual.pdf", pathToManual), 1, "/MediaBox")
 	pdf.AddPage()
 
 	importer.UseImportedTemplate(pdf, template, 0, 0, 215.9, 0)

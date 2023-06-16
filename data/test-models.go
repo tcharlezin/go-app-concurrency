@@ -76,7 +76,7 @@ func (u *UserTest) GetOne(id int) (*User, error) {
 	return u.GetByEmail("")
 }
 
-func (u *UserTest) Update() error {
+func (u *UserTest) Update(user User) error {
 	return nil
 }
 
