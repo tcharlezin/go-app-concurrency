@@ -8,6 +8,7 @@ import (
 	"github.com/phpdave11/gofpdf/contrib/gofpdi"
 	"html/template"
 	"net/http"
+	"os"
 	"strconv"
 	"time"
 )
@@ -114,8 +115,9 @@ func (app *Config) PostRegisterPage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// send a activation email
-	url := fmt.Sprintf("http://localhost/activate?email=%s", user.Email)
-	signedUrl := GenerateTokenFromString(url)
+	url := os.Getenv("URL")
+	fullUrl := fmt.Sprintf("%s/activate?email=%s", url, user.Email)
+	signedUrl := GenerateTokenFromString(fullUrl)
 
 	app.InfoLog.Println(signedUrl)
 
@@ -134,8 +136,8 @@ func (app *Config) PostRegisterPage(w http.ResponseWriter, r *http.Request) {
 
 func (app *Config) ActivateAccount(w http.ResponseWriter, r *http.Request) {
 	// validate the url
-	url := r.RequestURI
-	testURL := fmt.Sprintf("http://localhost%s", url)
+	path := r.RequestURI
+	testURL := fmt.Sprintf(os.Getenv("URL"), path)
 
 	okay := VerifyToken(testURL)
 
